@@ -13,7 +13,7 @@
 		private $loop;
 
 		/** Job worker information. */
-		private $jobs;
+		private $jobs = [];
 
 		/** Worker check Timer. */
 		private $checkTimer;
