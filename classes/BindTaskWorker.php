@@ -34,61 +34,38 @@
 			$new = !file_exists($filename);
 			$bind->clearRecords();
 
-			$recordDomain = ($domain->getAliasOf() != null) ? $domain->getAliasDomain(true) : $domain;
+			$data = $domain->getRecordsInfo(true);
 
-			$soa = $recordDomain->getSOARecord()->parseSOA();
-			$bindSOA = array('Nameserver' => $soa['primaryNS'],
-			                 'Email' => $soa['adminAddress'],
-			                 'Serial' => $soa['serial'],
-			                 'Refresh' => $soa['refresh'],
-			                 'Retry' => $soa['retry'],
-			                 'Expire' => $soa['expire'],
-			                 'MinTTL' => $soa['minttl']);
+			// TODO: This section duplicates BindZoneFileHander.
+			// We should change this to build using ZoneFileHandler instead.
+			$bind->setSOA($data['soa']);
 
-			$bind->setSOA($bindSOA);
+			if ($data['records'] instanceof RecordsInfo) { $data['records'] = $data['records']->get(); }
 
 			$hasNS = false;
-
 			if (!$domain->isDisabled()) {
-				foreach ($recordDomain->getRecords() as $record) {
-					if ($record->isDisabled()) { continue; }
-
-					$name = $record->getName() . '.';
-					if ($recordDomain != $domain) { $name = preg_replace('#' . preg_quote($recordDomain->getDomainRaw()) . '.$#', $domain->getDomainRaw() . '.', $name); }
-
-					$content = $record->getContent();
-					if (in_array($record->getType(), ['CNAME', 'NS', 'MX', 'PTR'])) {
-						$content = $record->getContent() . '.';
-						if ($recordDomain != $domain) { $content = preg_replace('#' . preg_quote($recordDomain->getDomainRaw()) . '.$#', $domain->getDomainRaw() . '.', $content); }
-
-					} else if ($record->getType() == 'SRV') {
-						if (preg_match('#^[0-9]+ [0-9]+ ([^\s]+)$#', $content, $m)) {
-							if ($m[1] != ".") {
-								$content = $record->getContent() . '.';
-								if ($recordDomain != $domain) { $content = preg_replace('#' . preg_quote($recordDomain->getDomainRaw()) . '.$#', $domain->getDomainRaw() . '.', $content); }
-
-							}
+				foreach ($data['records'] as $type => $entries) {
+					foreach ($entries as $rname => $records) {
+						foreach ($records as $record) {
+							if ($type == 'NS') { $hasNS = true; }
+							$bind->setRecord($rname, $type, $record['Address'], $record['TTL'], isset($record['Priority']) ? $record['Priority'] : NULL);
 						}
 					}
-
-					if ($record->getType() == "NS" && $record->getName() == $recordDomain->getDomain()) {
-						$hasNS = true;
-					}
-
-					$bind->setRecord($name, $record->getType(), $content, $record->getTTL(), $record->getPriority());
 				}
 			}
+			// END TODO
 
-			// Bind requires an NS record to load the zone, don't bother
-			// attempting to add/change unless there is one.
-			//
-			// This means that the zone won't be added until it is actually
-			// valid.
 			$jobArgs = ['domain' => $domain->getDomainRaw(), 'filename' => $filename];
 
 			// Try and lock the zone to ensure that we are the only ones
 			// writing to it.
 			if (RedisLock::acquireLock('zone_' . $domain->getDomainRaw())) {
+
+				// Bind requires an NS record to load the zone, don't bother
+				// attempting to add/change unless there is one.
+				//
+				// This means that the zone won't be added until it is actually
+				// valid.
 				if ($hasNS) {
 					// if filemtime is the same as now, we need to wait to ensure
 					// bind does the right thing.
