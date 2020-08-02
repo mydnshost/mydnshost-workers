@@ -63,7 +63,6 @@
 						@time_sleep_until($filetime + 2);
 					}
 
-					// $bind->saveZoneFile();
 					$res = Bind::file_put_contents_atomic($filename, $zoneData);
 
 					if ($new) {
@@ -92,8 +91,6 @@
 		public function writeZoneKeys($domain) {
 			// Lock the zone file while we are making changes.
 			echo 'Writing zone keys for: ', $domain->getDomainRaw(), "\n";
-			$bind = new Bind($domain->getDomainRaw(), $this->bindConfig['zonedir']);
-			list($filename, $filename2) = $bind->getFileNames();
 
 			if (RedisLock::acquireLock('zone_' . $domain->getDomainRaw())) {
 				// Output any missing keys.
