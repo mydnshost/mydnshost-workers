@@ -12,8 +12,7 @@
 			$payload = $job->getPayload();
 
 			if (isset($payload['domain']) && isset($payload['oldName'])) {
-				$bind = new Bind($payload['oldName'], $this->bindConfig['zonedir']);
-				list($filename, $filename2) = $bind->getFileNames();
+				$filename = $this->bindConfig['zonedir'] . '/' . strtolower($payload['oldName']) . '.db';
 				if (file_exists($filename)) {
 					@unlink($filename);
 				}

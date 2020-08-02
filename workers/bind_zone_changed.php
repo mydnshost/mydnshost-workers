@@ -17,8 +17,7 @@
 				if (isset($payload['filename'])) {
 					$filename = $payload['filename'];
 				} else {
-					$bind = new Bind($payload['domain'], $this->bindConfig['zonedir']);
-					list($filename, $filename2) = $bind->getFileNames();
+					$filename = $this->bindConfig['zonedir'] . '/' . strtolower($payload['domain']) . '.db';
 				}
 
 				$domain = $payload['domain'];

@@ -11,8 +11,7 @@
 			$payload = $job->getPayload();
 
 			if (isset($payload['domain'])) {
-				$bind = new Bind($payload['domain'], $this->bindConfig['zonedir']);
-				list($filename, $filename2) = $bind->getFileNames();
+				$filename = $this->bindConfig['zonedir'] . '/' . strtolower($payload['domain']) . '.db';
 				foreach ([$filename, $filename . '.jbk', $filename . '.signed', $filename . '.signed.jnl'] as $f) {
 					if (file_exists($f)) {
 						echo 'Unlinking: ', $f, "\n";
