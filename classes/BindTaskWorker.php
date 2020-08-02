@@ -29,31 +29,18 @@
 
 		public function writeZoneFile($domain) {
 			echo 'Writing zone file for: ', $domain->getDomainRaw(), "\n";
-			$bind = new Bind($domain->getDomainRaw(), $this->bindConfig['zonedir']);
-			list($filename, $filename2) = $bind->getFileNames();
+
+			$filename = $this->bindConfig['zonedir'] . '/' . strtolower($domain->getDomainRaw()) . '.db';
+			echo 'Using filename: ', $filename, "\n";
+
 			$new = !file_exists($filename);
-			$bind->clearRecords();
+			if ($new) { echo 'File is new.', "\n"; }
 
-			$data = $domain->getRecordsInfo(true);
+			$recordsInfo = $domain->getRecordsInfo(true);
+			if ($recordsInfo['records'] instanceof RecordsInfo) { $recordsInfo['records'] = $recordsInfo['records']->get(); }
 
-			// TODO: This section duplicates BindZoneFileHander.
-			// We should change this to build using ZoneFileHandler instead.
-			$bind->setSOA($data['soa']);
-
-			if ($data['records'] instanceof RecordsInfo) { $data['records'] = $data['records']->get(); }
-
-			$hasNS = false;
-			if (!$domain->isDisabled()) {
-				foreach ($data['records'] as $type => $entries) {
-					foreach ($entries as $rname => $records) {
-						foreach ($records as $record) {
-							if ($type == 'NS') { $hasNS = true; }
-							$bind->setRecord($rname, $type, $record['Address'], $record['TTL'], isset($record['Priority']) ? $record['Priority'] : NULL);
-						}
-					}
-				}
-			}
-			// END TODO
+			$hasNS = !$domain->isDisabled() && isset($recordsInfo['records']['NS']);
+			$zoneData = ZoneFileHandler::get('bind')->generateZoneFile($domain->getDomain(), $recordsInfo);
 
 			$jobArgs = ['domain' => $domain->getDomainRaw(), 'filename' => $filename];
 
@@ -67,21 +54,25 @@
 				// This means that the zone won't be added until it is actually
 				// valid.
 				if ($hasNS) {
+					echo 'Zone has NS.', "\n";
 					// if filemtime is the same as now, we need to wait to ensure
 					// bind does the right thing.
-					$filetime = filemtime($filename);
+					$filetime = $new ? 0 : filemtime($filename);
 					if ($filetime >= time()) {
 						echo 'Sleeping for zone: ', $filename, "\n";
 						@time_sleep_until($filetime + 2);
 					}
 
-					$bind->saveZoneFile();
+					// $bind->saveZoneFile();
+					$res = Bind::file_put_contents_atomic($filename, $zoneData);
+
 					if ($new) {
 						$jobArgs['change'] = 'add';
 					} else {
 						$jobArgs['change'] = 'change';
 					}
 				} else if (file_exists($filename)) {
+					echo 'Zone has no NS.', "\n";
 					foreach ([$filename, $filename . '.jbk', $filename . '.signed', $filename . '.signed.jnl'] as $f) {
 						if (file_exists($f)) { @unlink($f); }
 					}
