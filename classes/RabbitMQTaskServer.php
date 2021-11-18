@@ -67,6 +67,7 @@
 					$worker->run($jobinfo);
 				} catch (Throwable $ex) {
 					sendReply('EXCEPTION', 'Uncaught Exception: ' . $ex->getMessage());
+					sendReply('TRACE', $ex->getTraceAsString());
 
 					// $msg->delivery_info['channel']->basic_reject($msg->delivery_info['delivery_tag'], true);
 
