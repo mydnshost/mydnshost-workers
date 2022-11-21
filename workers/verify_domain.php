@@ -14,6 +14,8 @@
 			if (isset($payload['domain'])) {
 				$domain = Domain::loadFromDomain(DB::get(), $payload['domain']);
 				if ($domain !== FALSE) {
+					echo 'Checking verification for: ', $domain->getDomain(), ' - Currently: ', $domain->getVerificationState(), ' as of ', date('r', $domain->getVerificationStateTime()), "\n";
+
 					$nsrecords = dns_get_record($domain->getDomainRaw(), DNS_NS);
 
 					$wantedNS = [];
@@ -55,9 +57,10 @@
 						$newState = 'valid';
 					}
 
-					$domain->getVerificationStateTime($newState);
-					$domain->getVerificationStateTime(time());
-					echo 'New domain state: ', $newState, "\n";
+					$domain->setVerificationState($newState);
+					$domain->setVerificationStateTime(time());
+					$domain->save();
+					echo 'New verification state for: ', $domain->getDomain(), ' - ', $domain->getVerificationState(), ' as of ', date('r', $domain->getVerificationStateTime()), "\n";
 				} else {
 					$job->setError('Unknown domain: ' . $payload['domain']);
 				}
