@@ -17,9 +17,15 @@
 		if ($type == 'ERR') { exit(1); }
 	}
 
+	if (!function_exists('getNextWorkerCommand')) {
+		function getNextWorkerCommand() {
+			return trim(fgets(STDIN));
+		}
+	}
+
 	// Wait for commands.
 	while (true) {
-		$line = trim(fgets(STDIN));
+		$line = getNextWorkerCommand();
 
 		$bits = explode(" ", $line, 2);
 
@@ -60,7 +66,7 @@
 	// Load TaskServer
 	if ($type == 'rabbitmq') {
 		$taskServer = new RabbitMQTaskServer();
-	} else {
+	} else if (!isset($taskServer)) {
 		sendReply('ERR', 'Invalid TaskServer type: ', $type);
 		exit(2);
 	}
