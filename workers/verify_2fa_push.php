@@ -15,7 +15,7 @@
 				$key = TwoFactorKey::loadFromUserKey(DB::get(), $payload['userid'], $payload['keyid']);
 
 				if ($key != FALSE && $key->isPush()) {
-					if ($key->pushVerify($message)) {
+					if ($key->pushVerify($payload['message'])) {
 						$key->setActive(true);
 						if (!$key->isOneTime()) { $key->setLastUsed(time()); }
 						$key->save();
