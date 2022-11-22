@@ -32,7 +32,7 @@
 				if ($payload['change'] == 'remove' || $payload['change'] == 'readd') {
   					$commands[] = '/usr/sbin/rndc sync -clean %1$s';
 					$commands[] = '/usr/sbin/rndc delzone %1$s';
-					$commands[] = 'rm "%2$s.db".*';
+					$commands[] = 'rm "%2$s".*';
 				}
 
 				// Add a domain (Standalone or as part of readd)
