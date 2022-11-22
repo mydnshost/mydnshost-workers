@@ -41,14 +41,16 @@
 					// Check which records in this domain are valid or not
 					$validRecords = 0;
 					$invalidRecords = 0;
-					foreach ($nsrecords as $record) {
-						echo 'Found record: ', $record['target'];
-						if (in_array(strtolower($record['target']), $wantedNS)) {
-							$validRecords++;
-							echo ' - valid', "\n";
-						} else {
-							$invalidRecords++;
-							echo ' - invalid', "\n";
+					if (is_array($nsrecords)) {
+						foreach ($nsrecords as $record) {
+							echo 'Found record: ', $record['target'];
+							if (in_array(strtolower($record['target']), $wantedNS)) {
+								$validRecords++;
+								echo ' - valid', "\n";
+							} else {
+								$invalidRecords++;
+								echo ' - invalid', "\n";
+							}
 						}
 					}
 
