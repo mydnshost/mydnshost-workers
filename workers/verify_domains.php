@@ -11,13 +11,16 @@
 		public function run($job) {
 			$payload = $job->getPayload();
 
+			$limit = isset($payload['limit']) ? $payload['limit'] : 10;
+			$age = isset($payload['age']) ? $payload['age'] : (86400 * 7);
+
 			// Find some domains that need verification.
-			$s = new Search(DB::get()->getPDO(), 'domains', ['domain', 'disabled', 'verificationstate', 'verificationstatetime']);
+			$s = new Search(DB::get()->getPDO(), 'domains', ['domain', 'disabled', 'verificationstatetime']);
 			$s->where('disabled', 'true', '!=');
-			$s->where('verificationstatetime', time() - (86400 * 7), '<=');
+			$s->where('verificationstatetime', time() - $age, '<=');
 			$s->order('verificationstatetime');
 			$s->order('domain');
-			$s->limit(10);
+			$s->limit($limit);
 			$rows = $s->getRows();
 
 			foreach ($rows as $row) {
