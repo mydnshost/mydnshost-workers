@@ -29,7 +29,7 @@
 					if (empty($wantedNS)) {
 						foreach (getSystemDefaultRecords() as $r) {
 							if (strtoupper($r['type']) == 'NS') {
-								$wantedNS[] = strtolower($t['content']);
+								$wantedNS[] = strtolower($r['content']);
 							}
 						}
 					}
