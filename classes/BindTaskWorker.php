@@ -129,7 +129,7 @@
 			}
 		}
 
-		public function runCommand($command, $domain, $filename) {
+		public function buildCommand($command, $domain, $filename) {
 			$ips = [];
 			$domainRaw = ($domain instanceof Domain) ? $domain->getDomainRaw() : $domain;
 
@@ -141,7 +141,11 @@
 				$ips[] = '';
 			}
 
-			$cmd = sprintf($command, escapeshellarg($domainRaw), escapeshellarg($filename), implode('; ', $ips));
+			return sprintf($command, escapeshellarg($domainRaw), escapeshellarg($filename), implode('; ', $ips));
+		}
+
+		public function runCommand($command, $domain, $filename) {
+			$cmd = $this->buildCommand($command, $domain, $filename);
 			exec($cmd);
 		}
 
