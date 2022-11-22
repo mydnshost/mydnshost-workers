@@ -32,7 +32,7 @@
 				if ($payload['change'] == 'remove' || $payload['change'] == 'readd') {
   					$commands[] = '/usr/sbin/rndc sync -clean %1$s';
 					$commands[] = '/usr/sbin/rndc delzone %1$s';
-					$commands[] = 'rm "%2$s".*';
+					$commands[] = 'rm -v "%2$s".*';
 				}
 
 				// Add a domain (Standalone or as part of readd)
@@ -40,7 +40,7 @@
 					$domain = Domain::loadFromDomain(DB::get(), $payload['domain']);
 					if ($domain === FALSE) { $domain = $payload['domain']; }
 
-					$commands[] = 'chmod a+rwx %2$s';
+					$commands[] = 'chmod -v a+rwx %2$s';
 					$commands[] = '/usr/sbin/rndc addzone %1$s \'{type master; file "%2$s"; allow-transfer { %3$s }; auto-dnssec maintain; inline-signing yes; };\'';
 				}
 
@@ -50,7 +50,7 @@
 					if ($domain === FALSE) { $domain = $payload['domain']; }
 
 					$commands[] = '/usr/sbin/rndc sync -clean %1$s';
-					$commands[] = 'chmod a+rwx %2$s';
+					$commands[] = 'chmod -v a+rwx %2$s';
 					$commands[] = '/usr/sbin/rndc reload %1$s';
 
 					$commands[] = '/usr/sbin/rndc signing -clear all %1$s';
