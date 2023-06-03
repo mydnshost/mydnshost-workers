@@ -48,7 +48,7 @@
 						echo 'Failed to generate KSK.', "\n";
 					}
 
-					$this->writeZoneKeys($domain);
+					$this->writeZoneKeys($domain, false);
 
 					if ($generated) {
 						echo 'Keys generated, scheduling zone refresh.', "\n";

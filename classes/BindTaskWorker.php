@@ -88,7 +88,7 @@
 			}
 		}
 
-		public function writeZoneKeys($domain) {
+		public function writeZoneKeys($domain, $generateIfMissing = True) {
 			// Lock the zone file while we are making changes.
 			echo 'Writing zone keys for: ', $domain->getDomainRaw(), "\n";
 
@@ -97,8 +97,12 @@
 				$keys = $domain->getZoneKeys();
 
 				if (empty($keys)) {
-					echo 'No keys found, generating new keys.', "\n";
-					$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_create_keys', ['domain' => $domain->getDomainRaw(), 'ifmissing' => true]));
+					if ($generateIfMissing) {
+						echo 'No keys found, generating new keys.', "\n";
+						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_create_keys', ['domain' => $domain->getDomainRaw(), 'ifmissing' => true]));
+					} else {
+						echo 'No keys found to write.', "\n";
+					}
 				} else {
 					$validFiles = [];
 					foreach ($keys as $key) {
