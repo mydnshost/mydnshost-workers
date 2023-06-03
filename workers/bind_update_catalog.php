@@ -90,7 +90,7 @@
 					$bind->saveZoneFile($this->bindConfig['catalogZoneFile']);
 
 					if ($refresh) {
-						$jobArgs = ['domain' => $this->bindConfig['catalogZoneName'], 'change' => 'change', 'noCatalog' => true, 'filename' => $this->bindConfig['catalogZoneFile']];
+						$jobArgs = ['domain' => $this->bindConfig['catalogZoneName'], 'change' => 'change', 'noCatalog' => true, 'isCatalog' => true, 'filename' => $this->bindConfig['catalogZoneFile']];
 						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs));
 					}
 				}
