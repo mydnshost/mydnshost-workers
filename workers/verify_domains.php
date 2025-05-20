@@ -13,10 +13,12 @@
 
 			$limit = isset($payload['limit']) ? $payload['limit'] : 10;
 			$age = isset($payload['age']) ? $payload['age'] : (86400 * 7);
+			$state = isset($payload['state']) ? $payload['state'] : null;
 
 			// Find some domains that need verification.
-			$s = new Search(DB::get()->getPDO(), 'domains', ['domain', 'disabled', 'verificationstatetime']);
+			$s = new Search(DB::get()->getPDO(), 'domains', ['domain', 'disabled', 'verificationstatetime', 'verificationstate']);
 			$s->where('disabled', 'true', '!=');
+			if (!empty($state)) { $s->where('verificationstate', $state, '=='); }
 			$s->where('verificationstatetime', time() - $age, '<=');
 			$s->order('verificationstatetime');
 			$s->order('domain');
