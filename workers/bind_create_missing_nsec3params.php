@@ -38,7 +38,7 @@
                 $limit = isset($payload['limit']) ? $payload['limit'] : 10;
 
                 // Find some domains that are missing nsec3 params.
-                $s = new \shanemcc\phpdb\Search(\shanemcc\phpdb\DB::get()->getPDO(), 'domains', ['domain', 'disabled', 'nsec3params']);
+                $s = new Search(DB::get()->getPDO(), 'domains', ['domain', 'disabled', 'nsec3params']);
                 $s->where('disabled', 'true', '!=');
                 $s->where('nsec3params', null, 'is');
                 $s->order('domain');
