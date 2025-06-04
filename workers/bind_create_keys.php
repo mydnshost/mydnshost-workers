@@ -50,6 +50,15 @@
 
 					$this->writeZoneKeys($domain, false);
 
+					$nsec3 = $domain->getNSEC3Params();
+					if (empty($nsec3)) {
+						echo 'Generating NSEC3 Params.', "\n";
+						$nsec3hash = substr(sha1(openssl_random_pseudo_bytes('512')), 0, 16);
+						$domain->setNSEC3Params('1 0 10 ' . $nsec3hash);
+						$domain->save();
+						$generated = True;
+					}
+
 					if ($generated) {
 						echo 'Keys generated, scheduling zone refresh.', "\n";
 						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', ['domain' => $domain->getDomainRaw(), 'change' => 'change']));
