@@ -108,6 +108,7 @@
 					foreach ($keys as $key) {
 						$private = $this->bindConfig['keydir'] . '/' . $key->getKeyFileName('private');
 						$public = $this->bindConfig['keydir'] . '/' . $key->getKeyFileName('key');
+						$state = $this->bindConfig['keydir'] . '/' . $key->getKeyFileName('state');
 
 						if (!file_exists($private) || !file_exists($public)) {
 							echo 'Writing missing keys: ', $key->getKeyFileName(), "\n";
@@ -117,6 +118,7 @@
 
 						$validFiles[] = $private;
 						$validFiles[] = $public;
+						$validFiles[] = $state;
 					}
 
 					// Remove no-longer required keys.
