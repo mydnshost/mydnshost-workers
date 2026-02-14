@@ -1,6 +1,5 @@
 <?php
 	use shanemcc\phpdb\DB;
-	use shanemcc\phpdb\Search;
 	require_once(dirname(__FILE__) . '/../classes/BindTaskWorker.php');
 
 	/**
@@ -60,8 +59,8 @@
 					}
 
 					if ($generated) {
-						echo 'Keys generated, scheduling zone refresh.', "\n";
-						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', ['domain' => $domain->getDomainRaw(), 'change' => 'change']));
+						echo 'Keys generated, scheduling zone readd to apply dnssec-policy.', "\n";
+						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', ['domain' => $domain->getDomainRaw(), 'change' => 'readd']));
 					} else {
 						echo 'No keys generated.', "\n";
 					}

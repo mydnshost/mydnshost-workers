@@ -40,8 +40,14 @@
 					$domain = Domain::loadFromDomain(DB::get(), $payload['domain']);
 					if ($domain === FALSE) { $domain = $payload['domain']; }
 
+					$hasKeys = ($domain instanceof Domain && !empty($domain->getZoneKeys()));
+
 					$commands[] = 'chmod -v a+rwx %2$s';
-					$commands[] = '/usr/sbin/rndc addzone %1$s \'{type master; file "%2$s"; allow-transfer { %3$s }; auto-dnssec maintain; inline-signing yes; };\'';
+					if ($hasKeys) {
+						$commands[] = '/usr/sbin/rndc addzone %1$s \'{type master; file "%2$s"; allow-transfer { %3$s }; dnssec-policy "mydnshost"; };\'';
+					} else {
+						$commands[] = '/usr/sbin/rndc addzone %1$s \'{type master; file "%2$s"; allow-transfer { %3$s }; };\'';
+					}
 				}
 
 				// Reload a domain.
@@ -52,18 +58,6 @@
 					$commands[] = '/usr/sbin/rndc sync -clean %1$s';
 					$commands[] = 'chmod -v a+rwx %2$s';
 					$commands[] = '/usr/sbin/rndc reload %1$s';
-
-					// Don't attempt to sign the catalog zone.
-					if (!isset($payload['isCatalog'])) {
-						$commands[] = '/usr/sbin/rndc signing -clear all %1$s';
-						$commands[] = '/usr/sbin/rndc sign %1$s';
-						if ($domain instanceof Domain) {
-							$nsec3param = $domain->getNSEC3Params();
-							if (!empty($nsec3param)) {
-								$commands[] = '/usr/sbin/rndc signing -nsec3param ' . $nsec3param . ' %1$s';
-							}
-						}
-					}
 				}
 
 				// Run the appropriate commands.
