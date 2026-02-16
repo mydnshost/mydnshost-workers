@@ -73,8 +73,12 @@
 
 					$worker->run($jobinfo);
 				} catch (Throwable $ex) {
-					sendReply('EXCEPTION', 'Uncaught Exception: ' . $ex->getMessage());
-					sendReply('TRACE', $ex->getTraceAsString());
+					sendReply('TRACE', 'Uncaught Exception: ' . $ex->getMessage());
+					foreach (explode("\n", $ex->getTraceAsString()) as $traceLine) {
+						if ($traceLine !== '') {
+							sendReply('TRACE', $traceLine);
+						}
+					}
 
 					// $msg->delivery_info['channel']->basic_reject($msg->delivery_info['delivery_tag'], true);
 
@@ -83,7 +87,7 @@
 					EventQueue::get()->publish('job.finished', [$msgInfo['jobid'], $resultMsg]);
 					JobQueue::get()->replyToJob($msg, $resultMsg);
 
-					sendReply('ERR', 'Exception: ' . $ex->getMessage() . "\n" . $ex->getTraceAsString());
+					sendReply('ERR', 'Uncaught Exception: ' . $ex->getMessage());
 					return FALSE;
 				}
 
