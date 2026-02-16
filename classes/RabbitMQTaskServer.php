@@ -39,6 +39,13 @@
 
 				$job = Job::load(DB::get(), $msgInfo['jobid']);
 
+				if ($job === false || $job->getState() !== 'created') {
+					$stateInfo = ($job === false) ? 'not found' : 'in state: ' . $job->getState();
+					sendReply('SKIP', 'Job ' . $msgInfo['jobid'] . ' skipped (' . $stateInfo . ')');
+					JobQueue::get()->replyToJob($msg, 'SKIPPED');
+					return true;
+				}
+
 				$payload = $msgInfo['args'];
 				if (empty($payload)) {
 					$payload = [];
