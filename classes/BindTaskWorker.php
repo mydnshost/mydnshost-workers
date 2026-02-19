@@ -84,7 +84,7 @@
 			$this->writeZoneKeys($domain);
 
 			if (isset($jobArgs['change'])) {
-				$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs));
+				$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs, 'Zone file written (' . $jobArgs['change'] . ')'));
 			}
 		}
 
@@ -99,7 +99,7 @@
 				if (empty($keys)) {
 					if ($generateIfMissing) {
 						echo 'No keys found, generating new keys.', "\n";
-						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_create_keys', ['domain' => $domain->getDomainRaw(), 'ifmissing' => true]));
+						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_create_keys', ['domain' => $domain->getDomainRaw(), 'ifmissing' => true], 'No DNSSEC keys found, generating'));
 					} else {
 						echo 'No keys found to write.', "\n";
 					}

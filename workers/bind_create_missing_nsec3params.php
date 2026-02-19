@@ -27,7 +27,7 @@
 
 					if ($generated) {
 						echo 'NSEC3Params generated, scheduling zone refresh.', "\n";
-						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', ['domain' => $domain->getDomainRaw(), 'change' => 'change']));
+						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', ['domain' => $domain->getDomainRaw(), 'change' => 'change'], 'NSEC3 params generated'));
 					} else {
 						echo 'No NSEC3Params generated.', "\n";
 					}
@@ -47,7 +47,7 @@
 
                 foreach ($rows as $row) {
                     echo 'Attempting to create missing nsec3 params for domain: ', $row['domain'], "\n";
-                    $newjob = new JobInfo('', 'bind_create_missing_nsec3params', ['domain' => $row['domain']]);
+                    $newjob = new JobInfo('', 'bind_create_missing_nsec3params', ['domain' => $row['domain']], 'Batch NSEC3 param creation');
                     $this->getTaskServer()->runBackgroundJob($newjob);
                 }
 

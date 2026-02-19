@@ -14,7 +14,7 @@
 
 			foreach ($rows as $row) {
 				$change = strtolower($row['disabled']) == 'true' ? 'del' : 'readd';
-				$newjob = new JobInfo('', 'bind_zone_changed', ['domain' => $row['domain'], 'change' => $change, 'noCatalog' => true]);
+				$newjob = new JobInfo('', 'bind_zone_changed', ['domain' => $row['domain'], 'change' => $change, 'noCatalog' => true], 'Full zone re-add');
 				$this->getTaskServer()->runBackgroundJob($newjob);
 			}
 

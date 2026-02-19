@@ -48,7 +48,7 @@
 				chmod($zoneFile, 0777);
 
 				$jobArgs = ['domain' => $zoneName, 'change' => 'change', 'noCatalog' => true, 'filename' => $zoneFile];
-				$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs));
+				$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs, 'Catalog rebuilt'));
 
 				RedisLock::releaseLock('zone_' . $zoneName);
 			}

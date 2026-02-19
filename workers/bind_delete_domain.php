@@ -26,7 +26,7 @@
 					unlink($key);
 				}
 
-				$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', ['domain' => $payload['domain'], 'change' => 'remove', 'filename' => $filename]));
+				$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', ['domain' => $payload['domain'], 'change' => 'remove', 'filename' => $filename], 'Domain deletion cleanup'));
 				$job->setResult('OK');
 			} else {
 				$job->setError('Missing fields in payload.');

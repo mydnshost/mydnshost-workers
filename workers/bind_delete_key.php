@@ -32,7 +32,7 @@
 						$this->writeZoneKeys($domain, false);
 
 						echo 'Scheduling zone refresh.', "\n";
-						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', ['domain' => $domain->getDomainRaw(), 'change' => 'change']));
+						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', ['domain' => $domain->getDomainRaw(), 'change' => 'change'], 'Zone refresh after key deletion'));
 					} else {
 						echo 'Key not found in database: key_id=', $keyID, ' for ', $domain->getDomainRaw(), "\n";
 					}

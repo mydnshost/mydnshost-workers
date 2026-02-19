@@ -6,14 +6,14 @@
 
 		public function runBackgroundJob($jobinfo) {
 			echo 'Scheduling background job: ', $jobinfo->getFunction(), ' => ', json_encode($jobinfo->getPayload()), "\n";
-			$jobID = JobQueue::get()->publish(JobQueue::get()->create($jobinfo->getFunction(), $jobinfo->getPayload()));
+			$jobID = JobQueue::get()->publish(JobQueue::get()->create($jobinfo->getFunction(), $jobinfo->getPayload(), $jobinfo->getReason()));
 			echo 'Scheduled as: ', $jobID, "\n";
 		}
 
 		public function runJob($jobinfo) {
 			echo 'Running foreground job: ', $jobinfo->getFunction(), ' => ', json_encode($jobinfo->getPayload()), "\n";
 
-			[$jobID, $result] = JobQueue::get()->publishAndWait(JobQueue::get()->create($jobinfo->getFunction(), $jobinfo->getPayload()));
+			[$jobID, $result] = JobQueue::get()->publishAndWait(JobQueue::get()->create($jobinfo->getFunction(), $jobinfo->getPayload(), $jobinfo->getReason()));
 			echo 'Scheduled and finished as: ', $jobID, "\n";
 			return $result;
 		}

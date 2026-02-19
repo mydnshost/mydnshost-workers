@@ -60,7 +60,7 @@
 
 					if ($generated) {
 						echo 'Keys generated, scheduling zone readd to apply dnssec-policy.', "\n";
-						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', ['domain' => $domain->getDomainRaw(), 'change' => 'readd']));
+						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', ['domain' => $domain->getDomainRaw(), 'change' => 'readd'], 'Applying dnssec-policy after key generation'));
 					} else {
 						echo 'No keys generated.', "\n";
 					}

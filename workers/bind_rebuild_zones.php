@@ -13,7 +13,7 @@
 			$rows = $s->getRows();
 
 			foreach ($rows as $row) {
-				$newjob = new JobInfo('', 'bind_add_domain', ['domain' => $row['domain']]);
+				$newjob = new JobInfo('', 'bind_add_domain', ['domain' => $row['domain']], 'Full zone rebuild');
 				$this->getTaskServer()->runBackgroundJob($newjob);
 			}
 

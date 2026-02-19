@@ -30,7 +30,7 @@
 
 				// Remove a domain (or delete as part of readd)
 				if ($payload['change'] == 'remove' || $payload['change'] == 'readd') {
-  					$commands[] = '/usr/sbin/rndc sync -clean %1$s';
+ 					$commands[] = '/usr/sbin/rndc sync -clean %1$s';
 					$commands[] = '/usr/sbin/rndc delzone %1$s';
 					$commands[] = 'rm -v %2$s.*j*';
 				}
@@ -77,7 +77,7 @@
 				// Update the catalog zone unless noCatalog is passed.
 				// (This will be passed when we are being called because of the catalog zone being updated.)
 				if (!isset($payload['noCatalog'])) {
-					$newjob = new JobInfo('', 'bind_update_catalog', $job->getPayload());
+					$newjob = new JobInfo('', 'bind_update_catalog', $job->getPayload(), 'Zone changed for ' . $payload['domain']);
 					$this->getTaskServer()->runBackgroundJob($newjob);
 				}
 
