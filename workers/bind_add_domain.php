@@ -18,7 +18,7 @@
 					$isDependant = !empty($payload['__dependant']);
 					$result = $this->writeZoneFile($domain, $isDependant);
 					if ($result === false) {
-						$job->setResult('SKIPPED: RRCLONE unchanged');
+						$job->setResult('SKIPPED');
 					} else {
 						$job->setResult('OK');
 					}
