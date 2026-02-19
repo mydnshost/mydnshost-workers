@@ -6,14 +6,14 @@
 
 		public function runBackgroundJob($jobinfo) {
 			echo 'Scheduling background job: ', $jobinfo->getFunction(), ' => ', json_encode($jobinfo->getPayload()), "\n";
-			$jobID = JobQueue::get()->publish(JobQueue::get()->create($jobinfo->getFunction(), $jobinfo->getPayload(), $jobinfo->getReason()));
+			$jobID = JobQueue::get()->publish(JobQueue::get()->create($jobinfo->getFunction(), $jobinfo->getPayload(), $jobinfo->getReason(), $jobinfo->getCreatedByJob()));
 			echo 'Scheduled as: ', $jobID, "\n";
 		}
 
 		public function runJob($jobinfo) {
 			echo 'Running foreground job: ', $jobinfo->getFunction(), ' => ', json_encode($jobinfo->getPayload()), "\n";
 
-			[$jobID, $result] = JobQueue::get()->publishAndWait(JobQueue::get()->create($jobinfo->getFunction(), $jobinfo->getPayload(), $jobinfo->getReason()));
+			[$jobID, $result] = JobQueue::get()->publishAndWait(JobQueue::get()->create($jobinfo->getFunction(), $jobinfo->getPayload(), $jobinfo->getReason(), $jobinfo->getCreatedByJob()));
 			echo 'Scheduled and finished as: ', $jobID, "\n";
 			return $result;
 		}
@@ -62,6 +62,7 @@
 
 				$jobinfo = new JobInfo($msgInfo['jobid'], $msgInfo['job'], $payload);
 
+				$worker->setCurrentJobId($msgInfo['jobid']);
 				$job->setState('started')->setStarted(time())->save();
 
 				try {

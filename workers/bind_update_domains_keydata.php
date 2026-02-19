@@ -63,7 +63,7 @@
 				}
 
 				if ($needsUpdate) {
-					$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_update_domain_keydata', ['domain' => $domain->getDomainRaw()], 'Missing DS digest types'));
+					$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_update_domain_keydata', ['domain' => $domain->getDomainRaw()], 'Missing DS digest types', $this->getCurrentJobId()));
 					$scheduled++;
 				}
 			}

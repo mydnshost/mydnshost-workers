@@ -5,16 +5,18 @@
 		private $function = '';
 		private $payload = '';
 		private $reason = null;
+		private $createdByJob = null;
 		private $result = '';
 		private $hasResult = false;
 		private $errorMessage = 'Unknown Error.';
 		private $hasError = false;
 
-		public function __construct($jobid, $function, $payload = '', $reason = null) {
+		public function __construct($jobid, $function, $payload = '', $reason = null, $createdByJob = null) {
 			$this->jobid = $jobid;
 			$this->function = $function;
 			$this->payload = $payload;
 			$this->reason = $reason;
+			$this->createdByJob = $createdByJob;
 		}
 
 		public function getJobID() {
@@ -31,6 +33,10 @@
 
 		public function getReason() {
 			return $this->reason;
+		}
+
+		public function getCreatedByJob() {
+			return $this->createdByJob;
 		}
 
 		public function setResult($result = '') {

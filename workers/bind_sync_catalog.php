@@ -25,7 +25,7 @@
 
 				// Schedule the refresh.
 				$jobArgs = ['domain' => $this->bindConfig['catalogZoneName'], 'change' => 'change', 'noCatalog' => true, 'filename' => $this->bindConfig['catalogZoneFile']];
-				$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs, 'Catalog sync complete'));
+				$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs, 'Catalog sync complete', $this->getCurrentJobId()));
 
 				RedisLock::releaseLock('zone_' . $this->bindConfig['catalogZoneName']);
 			}

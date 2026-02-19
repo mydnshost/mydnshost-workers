@@ -17,7 +17,7 @@
 					@unlink($filename);
 				}
 
-				$newjob = new JobInfo('', 'bind_zone_changed', ['domain' => $payload['oldName'], 'filename' => $filename, 'change' => 'remove'], 'Removing old zone after rename from ' . $payload['oldName']);
+				$newjob = new JobInfo('', 'bind_zone_changed', ['domain' => $payload['oldName'], 'filename' => $filename, 'change' => 'remove'], 'Removing old zone after rename from ' . $payload['oldName'], $this->getCurrentJobId());
 				$this->getTaskServer()->runBackgroundJob($newjob);
 
 				$domain = Domain::loadFromDomain(DB::get(), $payload['domain']);

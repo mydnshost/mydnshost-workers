@@ -77,7 +77,7 @@
 				// Update the catalog zone unless noCatalog is passed.
 				// (This will be passed when we are being called because of the catalog zone being updated.)
 				if (!isset($payload['noCatalog'])) {
-					$newjob = new JobInfo('', 'bind_update_catalog', $job->getPayload(), 'Zone changed for ' . $payload['domain']);
+					$newjob = new JobInfo('', 'bind_update_catalog', $job->getPayload(), 'Zone changed for ' . $payload['domain'], $this->getCurrentJobId());
 					$this->getTaskServer()->runBackgroundJob($newjob);
 				}
 

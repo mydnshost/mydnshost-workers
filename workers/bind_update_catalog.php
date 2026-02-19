@@ -45,7 +45,7 @@
 
 			// Create the catalog if needed.
 			if (!file_exists($this->bindConfig['catalogZoneFile'])) {
-				$this->getTaskServer()->runJob(new JobInfo('', 'bind_create_catalog', [], 'Catalog zone file missing'));
+				$this->getTaskServer()->runJob(new JobInfo('', 'bind_create_catalog', [], 'Catalog zone file missing', $this->getCurrentJobId()));
 			}
 
 			// Now update.
@@ -70,7 +70,7 @@
 						$newAllowTransfer = $bind->getRecords('allow-transfer.' . $hash . '.zones', 'APL');
 						if (!empty($newAllowTransfer) && $newAllowTransfer[0] != $oldAllowTransfer) {
 							// Allowed-Transfer list has changed, re-add domain to bind
-							$newjob = new JobInfo('', 'bind_zone_changed', ['domain' => $domainraw, 'change' => 'readd', 'noCatalog' => true], 'Transfer list changed for ' . $domainraw);
+							$newjob = new JobInfo('', 'bind_zone_changed', ['domain' => $domainraw, 'change' => 'readd', 'noCatalog' => true], 'Transfer list changed for ' . $domainraw, $this->getCurrentJobId());
 							$this->getTaskServer()->runBackgroundJob($newjob);
 						} else {
 							// Transfer list has not changed, abort.
@@ -91,7 +91,7 @@
 
 					if ($refresh) {
 						$jobArgs = ['domain' => $this->bindConfig['catalogZoneName'], 'change' => 'change', 'noCatalog' => true, 'isCatalog' => true, 'filename' => $this->bindConfig['catalogZoneFile']];
-						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs, 'Catalog zone updated'));
+						$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs, 'Catalog zone updated', $this->getCurrentJobId()));
 					}
 				}
 

@@ -27,7 +27,7 @@
 
 			foreach ($rows as $row) {
 				echo 'Attempting to verify domain: ', $row['domain'], "\n";
-				$newjob = new JobInfo('', 'verify_domain', ['domain' => $row['domain']], 'Scheduled by periodic sweep');
+				$newjob = new JobInfo('', 'verify_domain', ['domain' => $row['domain']], 'Scheduled by periodic sweep', $this->getCurrentJobId());
 				$this->getTaskServer()->runBackgroundJob($newjob);
 			}
 

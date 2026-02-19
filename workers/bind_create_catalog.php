@@ -30,7 +30,7 @@
 				RedisLock::releaseLock('zone_' . $this->bindConfig['catalogZoneName']);
 			}
 
-			$this->getTaskServer()->runJob(new JobInfo('', 'bind_rebuild_catalog', [], 'Initial catalog creation'));
+			$this->getTaskServer()->runJob(new JobInfo('', 'bind_rebuild_catalog', [], 'Initial catalog creation', $this->getCurrentJobId()));
 			$job->setResult('OK');
 		}
 	}
