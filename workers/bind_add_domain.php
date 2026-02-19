@@ -15,8 +15,13 @@
 				$domain = Domain::loadFromDomain(DB::get(), $payload['domain']);
 
 				if ($domain !== FALSE) {
-					$this->writeZoneFile($domain);
-					$job->setResult('OK');
+					$isDependant = !empty($payload['__dependant']);
+					$result = $this->writeZoneFile($domain, $isDependant);
+					if ($result === false) {
+						$job->setResult('SKIPPED: RRCLONE unchanged');
+					} else {
+						$job->setResult('OK');
+					}
 				} else {
 					$job->setError('Unknown domain: ' . $payload['domain']);
 				}

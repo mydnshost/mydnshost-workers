@@ -27,7 +27,7 @@
 			@mkdir($this->bindConfig['keydir'], 0777, true);
 		}
 
-		public function writeZoneFile($domain) {
+		public function writeZoneFile($domain, $isDependant = false) {
 			echo 'Writing zone file for: ', $domain->getDomainRaw(), "\n";
 
 			$filename = $this->bindConfig['zonedir'] . '/' . strtolower($domain->getDomainRaw()) . '.db';
@@ -36,8 +36,26 @@
 			$new = !file_exists($filename);
 			if ($new) { echo 'File is new.', "\n"; }
 
+			// If this is a dependant cascade, capture current RRCLONE hashes before expansion
+			$oldHashes = null;
+			if ($isDependant && !$new) {
+				$oldHashes = $this->getRRCloneHashes($domain);
+			}
+
 			$recordsInfo = $domain->getRecordsInfo(true);
 			if ($recordsInfo['records'] instanceof RecordsInfo) { $recordsInfo['records'] = $recordsInfo['records']->get(); }
+
+			// Check if dependant cascade actually changed any RRCLONE expansions
+			if ($oldHashes !== null) {
+				$newHashes = $this->getRRCloneHashes($domain);
+				if ($oldHashes === $newHashes) {
+					echo 'RRCLONE hashes unchanged, skipping zone write for: ', $domain->getDomainRaw(), "\n";
+					return false;
+				}
+				// Hashes differ - bump serial now (deferred from dispatcher)
+				$newSerial = $domain->updateSerial();
+				$recordsInfo['soa']['Serial'] = $newSerial;
+			}
 
 			$hasNS = !$domain->isDisabled() && isset($recordsInfo['records']['NS']);
 			$zoneData = ZoneFileHandler::get('bind')->generateZoneFile($domain->getDomain(), $recordsInfo);
@@ -86,6 +104,17 @@
 			if (isset($jobArgs['change'])) {
 				$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs, 'Zone file written (' . $jobArgs['change'] . ')', $this->getCurrentJobId()));
 			}
+		}
+
+		private function getRRCloneHashes($domain) {
+			$hashes = [];
+			foreach ($domain->getRecords() as $record) {
+				if ($record->getType() === 'RRCLONE' && !$record->isDisabled()) {
+					$hashes[$record->getID()] = $record->getRemoteValueHash();
+				}
+			}
+			ksort($hashes);
+			return $hashes;
 		}
 
 		public function writeZoneKeys($domain, $generateIfMissing = True) {
