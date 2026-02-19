@@ -102,7 +102,7 @@
 			$this->writeZoneKeys($domain);
 
 			if (isset($jobArgs['change'])) {
-				$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs, 'Zone file written (' . $jobArgs['change'] . ')', $this->getCurrentJobId()));
+				$this->getTaskServer()->runBackgroundJob(new JobInfo('', 'bind_zone_changed', $jobArgs, 'Zone file written for ' . $domain->getDomainRaw() . ' (' . $jobArgs['change'] . ')', $this->getCurrentJobId()));
 			}
 		}
 
