@@ -20,6 +20,7 @@
 						if (!$key->isOneTime()) { $key->setLastUsed(time()); }
 						$key->save();
 
+						EventQueue::get()->publish('2fa.verified', [$payload['userid'], $payload['keyid']]);
 						$job->setResult('OK');
 					} else {
 						$job->setError('Push not approved.');
