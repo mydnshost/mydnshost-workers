@@ -27,7 +27,7 @@
 			@mkdir($this->bindConfig['keydir'], 0777, true);
 		}
 
-		public function writeZoneFile($domain, $isDependant = false) {
+		public function writeZoneFile($domain, $isDependant = false, $actor = null) {
 			echo 'Writing zone file for: ', $domain->getDomainRaw(), "\n";
 
 			$filename = $this->bindConfig['zonedir'] . '/' . strtolower($domain->getDomainRaw()) . '.db';
@@ -57,7 +57,7 @@
 				$newSerial = $domain->updateSerial();
 
 				$oldActor = EventQueue::get()->getActor();
-				EventQueue::get()->setActor(['type' => 'system', 'email' => 'system (RRCLONE update)']);
+				EventQueue::get()->setActor($actor ?? ['type' => 'system', 'email' => 'system (RRCLONE update)']);
 				EventQueue::get()->publish('record.update', [$domain->getID(), $domain->getSOARecord()->getID(), $oldSoa, json_encode($domain->getSOARecord())]);
 				EventQueue::get()->setActor($oldActor);
 				$recordsInfo['soa']['Serial'] = $newSerial;

@@ -16,7 +16,7 @@
 
 				if ($domain !== FALSE) {
 					$isDependant = !empty($payload['__dependant']);
-					$result = $this->writeZoneFile($domain, $isDependant);
+					$result = $this->writeZoneFile($domain, $isDependant, $payload['__actor'] ?? null);
 					if ($result === false) {
 						$job->setResult('SKIPPED');
 					} else {
