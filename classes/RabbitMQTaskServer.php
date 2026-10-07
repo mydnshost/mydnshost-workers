@@ -22,8 +22,6 @@
 			JobQueue::get()->consumeJobs($function, function ($msg) use ($function, $worker) {
 				$msgInfo = json_decode($msg->body, true);
 
-				EventQueue::get()->publish('job.started', [$msgInfo['jobid']]);
-
 				sendReply('JOB', $msgInfo['jobid']);
 				sendReply('FUNCTION', $msgInfo['job']);
 				sendReply('PAYLOAD', json_encode($msgInfo['args']));
@@ -39,12 +37,14 @@
 
 				$job = Job::load(DB::get(), $msgInfo['jobid']);
 
-				if ($job === false || $job->getState() !== 'created') {
-					$stateInfo = ($job === false) ? 'not found' : 'in state: ' . $job->getState();
+				if ($job === false || !$job->claim()) {
+					$stateInfo = ($job === false) ? 'not found' : 'not claimable, was in state: ' . $job->getState();
 					sendReply('SKIP', 'Job ' . $msgInfo['jobid'] . ' skipped (' . $stateInfo . ')');
 					JobQueue::get()->replyToJob($msg, 'SKIPPED');
 					return true;
 				}
+
+				EventQueue::get()->publish('job.started', [$msgInfo['jobid']]);
 
 				$payload = $msgInfo['args'];
 				if (empty($payload)) {
@@ -63,7 +63,6 @@
 				$jobinfo = new JobInfo($msgInfo['jobid'], $msgInfo['job'], $payload);
 
 				$worker->setCurrentJobId($msgInfo['jobid']);
-				$job->setState('started')->setStarted(time())->save();
 
 				try {
 					if (isset($payload['__wait'])) {
