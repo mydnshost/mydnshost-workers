@@ -53,7 +53,13 @@
 					return false;
 				}
 				// Hashes differ - bump serial now (deferred from dispatcher)
+				$oldSoa = json_encode($domain->getSOARecord());
 				$newSerial = $domain->updateSerial();
+
+				$oldActor = EventQueue::get()->getActor();
+				EventQueue::get()->setActor(['type' => 'system', 'email' => 'system (RRCLONE update)']);
+				EventQueue::get()->publish('record.update', [$domain->getID(), $domain->getSOARecord()->getID(), $oldSoa, json_encode($domain->getSOARecord())]);
+				EventQueue::get()->setActor($oldActor);
 				$recordsInfo['soa']['Serial'] = $newSerial;
 			}
 
