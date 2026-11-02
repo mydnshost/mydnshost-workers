@@ -36,19 +36,14 @@
 			$new = !file_exists($filename);
 			if ($new) { echo 'File is new.', "\n"; }
 
-			// If this is a dependant cascade, capture current RRCLONE hashes before expansion
-			$oldHashes = null;
-			if ($isDependant && !$new) {
-				$oldHashes = $this->getRRCloneHashes($domain);
-			}
-
 			$recordsInfo = $domain->getRecordsInfo(true);
 			if ($recordsInfo['records'] instanceof RecordsInfo) { $recordsInfo['records'] = $recordsInfo['records']->get(); }
 
 			// Check if dependant cascade actually changed any RRCLONE expansions
-			if ($oldHashes !== null) {
-				$newHashes = $this->getRRCloneHashes($domain);
-				if ($oldHashes === $newHashes) {
+			if ($isDependant && !$new) {
+				$newHashes = $recordsInfo['rrcloneHashes'];
+				ksort($newHashes);
+				if ($this->getRRCloneHashes($domain) === $newHashes) {
 					echo 'RRCLONE hashes unchanged, skipping zone write for: ', $domain->getDomainRaw(), "\n";
 					return false;
 				}
@@ -88,6 +83,9 @@
 					}
 
 					$res = Bind::file_put_contents_atomic($filename, $zoneData);
+
+					// Only remember these once they are actually in the zone file.
+					if ($res) { $domain->saveRRCloneHashes($recordsInfo['rrcloneHashes']); }
 
 					if ($new) {
 						$jobArgs['change'] = 'add';
