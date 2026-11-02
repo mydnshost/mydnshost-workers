@@ -33,12 +33,22 @@
 					$domain = Domain::loadFromDomain(DB::get(), $row['domain']);
 
 					if ($domain != FALSE) {
+						$hasNS = false;
 						foreach ($domain->getRecords() as $record) {
 							if ($record->isDisabled()) { continue; }
 							if ($record->getType() == "NS" && $record->getName() == $domain->getDomain()) {
-								$this->addCatalogRecords($bind, $domain->getDomainRaw());
+								$hasNS = true;
 								break;
 							}
+						}
+
+						// NS records can also come from an alias or RRCLONE. Only look
+						// for those if needed, as getRecordsInfo() can save changes to
+						// RRCLONE records.
+						if (!$hasNS) { $hasNS = $domain->getRecordsInfo()['hasNS']; }
+
+						if ($hasNS) {
+							$this->addCatalogRecords($bind, $domain->getDomainRaw());
 						}
 					}
 				}
