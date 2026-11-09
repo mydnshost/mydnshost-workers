@@ -197,6 +197,7 @@
 			$process->stdin->write('setRedisHost ' . $this->redisHost . ' ' . $this->redisPort . "\n");
 			$process->stdin->write('addFunction ' . $function . "\n");
 			$process->stdin->write('setTaskServer ' . $this->server['type'] . ' ' . $this->server['host'] . ' ' . $this->server['port'] . "\n");
+			$process->stdin->write('setMaxJobs ' . $this->jobs[$function]['maxJobs'] . "\n");
 			$process->stdin->write('run' . "\n");
 		}
 
@@ -237,26 +238,19 @@
 
 			$jobFinished = false;
 
-			// Count the jobs from the worker, restarting it as needed.
+			// Count the jobs from the worker, and learn its job ID.
 			if ($cmd == 'JOB') {
 				$this->jobs[$function]['workers'][$pid]['jobcount']++;
-				$process = $this->jobs[$function]['workers'][$pid];
-				if ($process['jobcount'] >= $this->jobs[$function]['maxJobs']) {
-					echo showTime(), ' ', $this->showIdent($function, $pid), '  Terminating process after ' . $process['jobcount'] . ' jobs.', "\n";
-
-					$process['process']->terminate(SIGTERM);
-
-					// Replace the worker immediately if we stop it.
-					$this->startWorker($function);
-				}
-
-				// Also, learn this worker's job ID.
 				$this->jobs[$function]['workers'][$pid]['currentJob'] = $args;
 			} else if ($cmd == 'EXCEPTION' || $cmd == 'ERR') {
 				EventQueue::get()->publish('worker.error', [$function, $args]);
 				$jobFinished = true;
 			} else if ($cmd == 'RESULT' || $cmd == 'SKIP') {
 				$jobFinished = true;
+			} else if ($cmd == 'RETIRING') {
+				// The worker has done its maxJobs and is exiting by itself
+				// between jobs, so replace it immediately.
+				$this->startWorker($function);
 			}
 
 			if ($this->jobs[$function]['workers'][$pid]['currentJob'] !== null) {

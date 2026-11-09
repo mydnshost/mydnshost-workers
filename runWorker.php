@@ -10,6 +10,7 @@
 	$type = '';
 	$server = '127.0.0.1';
 	$port = -1;
+	$maxJobs = 0;
 
 	function sendReply($type, ...$message) {
 		echo $type, ' ', implode('', $message), "\n";
@@ -55,6 +56,10 @@
 			if (isset($args[2]) && !empty($args[2])) { $port = $args[2]; }
 
 			sendReply('OK', 'Set task server type: ', $type, ' (', $server, ':', $port, ')');
+		} else if ($cmd == 'setMaxJobs') {
+			$maxJobs = intval($args);
+
+			sendReply('OK', 'Set max jobs: ', $maxJobs);
 		} else if ($cmd == 'run') {
 			sendReply('OK', 'Running');
 			break;
@@ -70,6 +75,7 @@
 		sendReply('ERR', 'Invalid TaskServer type: ', $type);
 		exit(2);
 	}
+	$taskServer->setMaxJobs($maxJobs);
 
 	// Load TaskWorkers
 	$workers = [];

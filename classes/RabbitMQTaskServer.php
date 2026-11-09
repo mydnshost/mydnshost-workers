@@ -2,7 +2,35 @@
 	use shanemcc\phpdb\DB;
 
 	class RabbitMQTaskServer {
+		private $maxJobs = 0;
+		private $jobCount = 0;
+
 		public function __construct() { }
+
+		/**
+		 * Stop consuming once this many jobs have been completed.
+		 *
+		 * @param $maxJobs Number of jobs, or 0 for no limit.
+		 */
+		public function setMaxJobs($maxJobs) {
+			$this->maxJobs = $maxJobs;
+		}
+
+		/**
+		 * Called once a job has been fully dealt with (saved and acked), to
+		 * stop consuming if we have reached maxJobs.
+		 *
+		 * This happens here rather than by our parent signalling us, so that
+		 * we never get stopped part-way through a job.
+		 */
+		private function jobDone() {
+			$this->jobCount++;
+
+			if ($this->maxJobs > 0 && $this->jobCount >= $this->maxJobs) {
+				sendReply('RETIRING', 'Stopping after ', $this->jobCount, ' jobs.');
+				$this->stop();
+			}
+		}
 
 		public function runBackgroundJob($jobinfo) {
 			echo 'Scheduling background job: ', $jobinfo->getFunction(), ' => ', json_encode($jobinfo->getPayload()), "\n";
@@ -41,6 +69,7 @@
 					$stateInfo = ($job === false) ? 'not found' : 'not claimable, was in state: ' . $job->getState();
 					sendReply('SKIP', 'Job ' . $msgInfo['jobid'] . ' skipped (' . $stateInfo . ')');
 					JobQueue::get()->replyToJob($msg, 'SKIPPED');
+					$this->jobDone();
 					return true;
 				}
 
@@ -112,6 +141,7 @@
 					$job->setState($resultState)->setFinished(time())->setResult($resultMsg)->save();
 					EventQueue::get()->publish('job.finished', [$msgInfo['jobid'], $resultMsg]);
 					JobQueue::get()->replyToJob($msg, $resultMsg);
+					$this->jobDone();
 
 					return true;
 				}

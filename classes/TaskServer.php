@@ -7,4 +7,5 @@
 		abstract function addTaskWorker($function, $worker);
 		abstract function run();
 		abstract function stop();
+		function setMaxJobs($maxJobs) { }
 	}
